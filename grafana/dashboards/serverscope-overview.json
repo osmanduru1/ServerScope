@@ -1,0 +1,71 @@
+{
+  "annotations": {"list": []},
+  "editable": true,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "datasource": {"type": "prometheus", "uid": "serverscope-prometheus"},
+      "fieldConfig": {"defaults": {"max": 100, "min": 0, "unit": "percent"}},
+      "gridPos": {"h": 8, "w": 8, "x": 0, "y": 0},
+      "id": 1,
+      "options": {"legend": {"displayMode": "hidden"}},
+      "targets": [{"expr": "serverscope_cpu_usage_percent", "legendFormat": "CPU", "refId": "A"}],
+      "title": "CPU utilization",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "serverscope-prometheus"},
+      "fieldConfig": {"defaults": {"max": 100, "min": 0, "unit": "percent"}},
+      "gridPos": {"h": 8, "w": 8, "x": 8, "y": 0},
+      "id": 2,
+      "options": {"legend": {"displayMode": "hidden"}},
+      "targets": [{"expr": "serverscope_memory_usage_percent", "legendFormat": "Memory", "refId": "A"}],
+      "title": "Memory utilization",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "serverscope-prometheus"},
+      "fieldConfig": {"defaults": {"max": 100, "min": 0, "unit": "percent"}},
+      "gridPos": {"h": 8, "w": 8, "x": 16, "y": 0},
+      "id": 3,
+      "options": {"legend": {"displayMode": "hidden"}},
+      "targets": [{"expr": "serverscope_disk_usage_percent", "legendFormat": "Disk", "refId": "A"}],
+      "title": "Disk utilization",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "serverscope-prometheus"},
+      "fieldConfig": {"defaults": {"unit": "decbytes"}},
+      "gridPos": {"h": 8, "w": 16, "x": 0, "y": 8},
+      "id": 4,
+      "options": {"legend": {"displayMode": "table", "placement": "bottom"}},
+      "targets": [
+        {"expr": "rate(serverscope_network_bytes_received_total[1m])", "legendFormat": "Received/sec", "refId": "A"},
+        {"expr": "rate(serverscope_network_bytes_sent_total[1m])", "legendFormat": "Sent/sec", "refId": "B"}
+      ],
+      "title": "Network throughput",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "serverscope-prometheus"},
+      "fieldConfig": {"defaults": {"unit": "s"}},
+      "gridPos": {"h": 8, "w": 8, "x": 16, "y": 8},
+      "id": 5,
+      "options": {"colorMode": "value", "graphMode": "area", "reduceOptions": {"calcs": ["lastNotNull"]}},
+      "targets": [{"expr": "serverscope_uptime_seconds", "refId": "A"}],
+      "title": "Host uptime",
+      "type": "stat"
+    }
+  ],
+  "refresh": "15s",
+  "schemaVersion": 41,
+  "tags": ["serverscope", "infrastructure", "linux"],
+  "templating": {"list": []},
+  "time": {"from": "now-1h", "to": "now"},
+  "timezone": "browser",
+  "title": "ServerScope Overview",
+  "uid": "serverscope-overview",
+  "version": 1
+}

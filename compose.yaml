@@ -1,0 +1,46 @@
+services:
+  serverscope:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      SERVERSCOPE_DB_PATH: /app/data/serverscope.db
+      SERVERSCOPE_COLLECTION_INTERVAL: 15
+    volumes:
+      - serverscope-data:/app/data
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:v3.5.0
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    depends_on:
+      - serverscope
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:12.1.0
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+volumes:
+  serverscope-data:
+  prometheus-data:
+  grafana-data:
