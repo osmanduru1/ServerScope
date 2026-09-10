@@ -24,3 +24,15 @@ def test_repository_saves_and_returns_metrics(tmp_path):
     assert history[0]["cpu_percent"] == 12.5
     assert repository.is_healthy()
 
+
+def test_repository_enforces_retention_limit(tmp_path):
+    repository = MetricsRepository(str(tmp_path / "retention.db"), max_records=2)
+    repository.initialize()
+
+    for index in range(3):
+        repository.save({**SAMPLE_METRICS, "cpu_percent": index})
+
+    history = repository.recent(10)
+
+    assert len(history) == 2
+    assert [row["cpu_percent"] for row in history] == [2.0, 1.0]

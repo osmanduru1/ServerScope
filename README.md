@@ -1,14 +1,17 @@
 # ServerScope
 
-ServerScope is a containerized Linux monitoring platform. It collects system
-health metrics, stores historical readings, exposes REST and Prometheus-compatible
-endpoints, and visualizes time-series data through a provisioned Grafana dashboard.
+ServerScope is a containerized single-host Linux monitoring service. It collects
+system health metrics, stores bounded historical readings, exposes REST and
+Prometheus-compatible endpoints, and visualizes time-series data through a
+provisioned Grafana dashboard.
 
 ## Current MVP
 
 - CPU, memory, disk, uptime, and network I/O monitoring
 - SQLite-backed metric history
 - Configurable background collection interval
+- Bounded local retention to prevent unbounded SQLite growth
+- Resilient background collection loop with error logging
 - JSON API for current and historical metrics
 - Prometheus-compatible metrics endpoint
 - Prometheus time-series collection
@@ -54,6 +57,12 @@ outside your local machine.
 | --- | --- | --- |
 | `SERVERSCOPE_DB_PATH` | `data/serverscope.db` | SQLite database path |
 | `SERVERSCOPE_COLLECTION_INTERVAL` | `15` | Seconds between readings |
+| `SERVERSCOPE_MAX_METRIC_RECORDS` | `10000` | Maximum readings retained locally |
+| `GRAFANA_ADMIN_USER` | `admin` | Grafana development admin user |
+| `GRAFANA_ADMIN_PASSWORD` | `admin` | Grafana development admin password |
+
+Set a non-default Grafana password before exposing the stack outside a local
+development network.
 
 ## API
 

@@ -1,5 +1,6 @@
 import asyncio
 from contextlib import asynccontextmanager, suppress
+import logging
 
 from fastapi import FastAPI, Query
 from fastapi.responses import HTMLResponse, Response
@@ -11,7 +12,8 @@ from app.metrics import collect_metrics
 from app.observability import update_prometheus_metrics
 
 
-repository = MetricsRepository(settings.db_path)
+repository = MetricsRepository(settings.db_path, settings.max_metric_records)
+logger = logging.getLogger("serverscope")
 
 
 def collect_and_record() -> dict:
@@ -22,7 +24,10 @@ def collect_and_record() -> dict:
 
 async def collection_loop() -> None:
     while True:
-        collect_and_record()
+        try:
+            collect_and_record()
+        except Exception:
+            logger.exception("Metric collection failed")
         await asyncio.sleep(settings.collection_interval)
 
 

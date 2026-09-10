@@ -16,20 +16,28 @@ CREATE TABLE IF NOT EXISTS metrics (
 )
 """
 
+CREATE_RECORDED_AT_INDEX = """
+CREATE INDEX IF NOT EXISTS idx_metrics_recorded_at ON metrics(recorded_at)
+"""
+
 
 class MetricsRepository:
-    def __init__(self, db_path: str):
+    def __init__(self, db_path: str, max_records: int = 10000):
         self.db_path = db_path
+        self.max_records = max_records
 
     def _connect(self) -> sqlite3.Connection:
-        connection = sqlite3.connect(self.db_path)
+        connection = sqlite3.connect(self.db_path, timeout=10)
         connection.row_factory = sqlite3.Row
         return connection
 
     def initialize(self) -> None:
         Path(self.db_path).parent.mkdir(parents=True, exist_ok=True)
         with self._connect() as connection:
+            connection.execute("PRAGMA journal_mode=WAL")
+            connection.execute("PRAGMA busy_timeout=10000")
             connection.execute(CREATE_METRICS_TABLE)
+            connection.execute(CREATE_RECORDED_AT_INDEX)
 
     def save(self, metrics: dict[str, Any]) -> dict[str, Any]:
         with self._connect() as connection:
@@ -50,6 +58,7 @@ class MetricsRepository:
                     metrics["network_bytes_received"],
                 ),
             )
+            self._enforce_retention(connection)
         return {"id": cursor.lastrowid, **metrics}
 
     def recent(self, limit: int) -> list[dict[str, Any]]:
@@ -67,3 +76,15 @@ class MetricsRepository:
         except sqlite3.Error:
             return False
 
+    def _enforce_retention(self, connection: sqlite3.Connection) -> None:
+        if self.max_records <= 0:
+            return
+        connection.execute(
+            """
+            DELETE FROM metrics
+            WHERE id NOT IN (
+                SELECT id FROM metrics ORDER BY id DESC LIMIT ?
+            )
+            """,
+            (self.max_records,),
+        )

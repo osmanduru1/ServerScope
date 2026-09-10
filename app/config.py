@@ -8,7 +8,7 @@ class Settings:
     collection_interval: int = int(
         os.getenv("SERVERSCOPE_COLLECTION_INTERVAL", "15")
     )
+    max_metric_records: int = int(os.getenv("SERVERSCOPE_MAX_METRIC_RECORDS", "10000"))
 
 
 settings = Settings()
-
